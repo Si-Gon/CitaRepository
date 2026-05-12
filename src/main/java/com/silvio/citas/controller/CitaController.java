@@ -26,4 +26,6 @@ public class CitaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
     }
     
+
+
 }
