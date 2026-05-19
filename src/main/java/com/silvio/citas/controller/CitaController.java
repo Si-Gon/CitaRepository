@@ -1,13 +1,24 @@
 package com.silvio.citas.controller;
 
-import com.silvio.citas.model.Cita;
+import com.silvio.citas.dto.CitaRequestDTO;
+import com.silvio.citas.dto.CitaResponseDTO;
 import com.silvio.citas.service.CitaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+
+//   POST   /api/citas        → crear
+//   GET    /api/citas        → listar todos
+//   GET    /api/citas/{id}   → obtener uno
+//   PATCH /api/citas/{id}   → cancelar
+
+//   201 CREATED   → POST exitoso
+//   200 OK  → PATCH /cancelar exitoso
+
 
 @RestController
 @RequestMapping("/api/citas")
@@ -16,16 +27,32 @@ public class CitaController {
 
     private final CitaService citaService;
 
-    //endpoint para crear una nueva cita
-    @PostMapping
-    public ResponseEntity<Cita> crearCita(@RequestBody Cita cita){
-        //1- llamamos al servicio (que a su vez usará feign para veriicar el paciente)
-        Cita nuevaCita = citaService.crearCita(cita);
+    // POST /api/citas
 
-        //devolvemos la cita creada con un codigo HTTP 201 created
+    @PostMapping
+    public ResponseEntity<CitaResponseDTO> crearCita(@Valid @RequestBody CitaRequestDTO request) {
+        CitaResponseDTO nuevaCita = citaService.crearCita(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCita);
     }
+
+    @GetMapping
+    public ResponseEntity<List<CitaResponseDTO>> obtenerTodas() {
+        List<CitaResponseDTO> citas = citaService.obtenerTodas();
+        return ResponseEntity.ok(citas);
+    }
+
+    // GET /api/citas/{id}
+    @GetMapping("/{id}")
+    public ResponseEntity<CitaResponseDTO> obtenerPorId(@PathVariable Long id) {
+        CitaResponseDTO cita = citaService.obtenerPorId(id);
+        return ResponseEntity.ok(cita);
+    }
+
+    // PATCH /api/citas/{id}/cancelar
     
-
-
+    @PatchMapping("/{id}/cancelar")
+public ResponseEntity<CitaResponseDTO> cancelarCita(@PathVariable Long id) {
+    CitaResponseDTO cita = citaService.cancelarCita(id);
+    return ResponseEntity.ok(cita);
+}
 }
